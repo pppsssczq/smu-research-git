@@ -8,6 +8,7 @@ from scipy.optimize import least_squares
 
 
 #process data keep columns=['quantity difference','change reason','price','mp_quantity','bid or ask','best price','best size']
+#only keep the traded order
 def processdata(filepath):
     SGX_df = pd.read_csv(filepath, index_col='timestamp', parse_dates=True)
     ad_SGX = SGX_df.drop(columns=['date', 'series', 'sequence_number', 'order_number', 'ob_position', 'ob_command'])
@@ -20,6 +21,7 @@ def processdata(filepath):
     return traded
 
 #resample data in different frequency
+#choose the last one for price
 def resampledata(traded,freq):
 
     direction=traded['bid_or_ask'].groupby(level=0).last()
@@ -58,7 +60,8 @@ def plotprice(traded,freq):
     bp2.plot(linestyle='None', marker='+', markersize=2)
     price.plot(linestyle='None', marker='+', markersize=2)
     plt.show()
-#plot volumn in different frequency
+#,sum the quantity in different frequency and plot it
+#
 def plotvolumn(data,freq):
     def volumn(x, y):  # bid order traded means someone sells  stocks at the bid price, which means selling
         for i in np.arange(len(x)):  # ask order traded means someone buys stocks at the ask price, which means buying
@@ -171,7 +174,7 @@ m=len(price)
 frac=1
 #by changing frac, you can seperate the one day data into several fractions.
 for i in range(0,frac):
-    if i==frac-1:
+    if i==frac-1:#if it's the last fraction
         loc2=m
     else:
         loc2 = int(loc1 + m / frac)
